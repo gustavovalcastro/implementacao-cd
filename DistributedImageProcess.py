@@ -1,39 +1,66 @@
-import dask_image.imread
-import dask_image.ndfilters
-from dask.distributed import Client
+import numpy as np
+import cv2
 
-# Essa funcao poderia fazer Data Augmentation
-def process_image(image_path, output_path):
-    # Read the image using dask-image
-    image = dask_image.imread.imread(image_path)
+def DA_brigthnessIncrease(image_input, image_output):
+    image = cv2.imread(image_input)
+    bright = np.ones(image.shape, dtype=np.uint8) * 60  # Increase brightness by 50
+    bright_image = cv2.add(image, bright)
+    cv2.imwrite(image_output, bright_image)
 
-    # Apply augmentation: Gaussian blur
-    filtered_image = dask_image.ndfilters.gaussian_filter(image, sigma=1)
+def DA_brigthnessDecrease(image_input, image_output):
+    image = cv2.imread(image_input)
+    dark = np.ones(image.shape, dtype=np.uint8) * 60  # Decrease brightness by 50
+    dark_image = cv2.subtract(image, dark)
+    cv2.imwrite(image_output, dark_image)
 
-    # Save the processed image
-    dask_image.imwrite(output_path, filtered_image)
+def DA_contrastIncrease(image_input, image_output):
+    image = cv2.imread(image_input)
+    alpha = 1.5  # Contrast control (1.0-3.0)
+    beta = 0  # Brightness control (0-100)
+    contrast_image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    cv2.imwrite(image_output, contrast_image)
 
-# Essa funcao realizaria a inferencia da imagem
-def infer_image(image_path):
-    # Read the image using dask-image
-    image = dask_image.imread.imread(image_path)
+def DA_contrastDecrease(image_input, image_output):
+    image = cv2.imread(image_input)
+    alpha = 0.5  # Contrast control (1.0-3.0)
+    beta = 0  # Brightness control (0-100)
+    contrast_image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    cv2.imwrite(image_output, contrast_image)
 
-    # Here you would typically run your model inference
-    # For demonstration, we will just return the shape of the image
+def DA_resize(image_input, image_output):
+    image = cv2.imread(image_input)
+    resized_image = cv2.resize(image, (320, 320))
+    cv2.imwrite(image_output, resized_image)
 
-    return image.shape
+def DA_randomNoise(image_input, image_output):
+    image = cv2.imread(image_input)
+    noise = np.random.randint(0, 256, image.shape, dtype=np.uint8)
+    noisy_image = cv2.add(image, noise)
+    cv2.imwrite(image_output, noisy_image)
 
-# This script uses Dask to process images in a distributed manner.
-if __name__ == "__main__":
-    # Initialize a Dask client on the specified address, change to the address of the server
-    client = Client('127.0.1:8786') 
+def DA_gaussianBlur(image_input, image_output):
+    image = cv2.imread(image_input)
+    blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
+    cv2.imwrite(image_output, blurred_image)
 
-    # Define the input and output paths
-    input_image_path = 'input_image.tif'
-    output_image_path = 'output_image.tif'
+def DA_flipHorizontal(image_input, image_output):
+    image = cv2.imread(image_input)
+    flipped_image = cv2.flip(image, 1)  # 1 for horizontal flip
+    cv2.imwrite(image_output, flipped_image)
 
-    # Process the image
-    client.submit(process_image, input_image_path, output_image_path)
+def DA_flipVertical(image_input, image_output):
+    image = cv2.imread(image_input)
+    flipped_image = cv2.flip(image, 0)  # 0 for vertical flip
+    cv2.imwrite(image_output, flipped_image)
 
-    # Close the Dask client
-    client.close()
+
+DA_brigthnessIncrease("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/1.jpg")
+DA_brigthnessDecrease("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/2.jpg")
+DA_contrastIncrease("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/3.jpg")
+DA_contrastDecrease("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/4.jpg")
+DA_resize("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/5.jpg")
+DA_randomNoise("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/6.jpg")
+DA_gaussianBlur("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/7.jpg")
+DA_flipHorizontal("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/8.jpg")
+DA_flipVertical("imagens_teste/WIN_20250618_19_19_17_Pro.jpg", "resultados_DA/9.jpg")
+
