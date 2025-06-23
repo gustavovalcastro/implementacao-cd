@@ -1,17 +1,27 @@
-# Save this as e.g., 'dask_worker_count.py'
 from dask.distributed import Client, TimeoutError
 import sys
 import json
 
-SCHEDULER_ADDRESS = "10.0.1.2:8786"  # Adjust as needed
+SCHEDULER_ADDRESS = "10.0.1.2:8786"
 
 try:
     client = Client(SCHEDULER_ADDRESS, timeout="5s")
+
     info = client.scheduler_info()
+
+    # No. of workers
     num_workers = len(info["workers"])
+    print(f"Number of Dask workers connected to {SCHEDULER_ADDRESS}: {num_workers}")
+
+    # Woker names
+    workers = info["workers"]
+    for worker in workers:
+        print(worker)
+
+    # Save worker info to file
     with open("workers.json", "w") as fd:
         json.dump(info, fd)
-    print(f"Number of Dask workers connected to {SCHEDULER_ADDRESS}: {num_workers}")
+
     client.close()
 except TimeoutError:
     print(
